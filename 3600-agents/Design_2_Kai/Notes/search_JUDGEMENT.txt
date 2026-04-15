@@ -1,0 +1,33 @@
+search_JUDGEMENT
+
+Planning search.py
+What search.py needs to do for Tier 1
+For Tier 1 (greedy), the job is: for every legal move, apply it, evaluate the resulting board, return the best one. That sounds trivial — but there are four non-obvious problems to solve first.
+Problem 1: The search decision is not a regular move in the tree
+Carpet and prime moves score points and change board state — they're naturals for a minimax tree. A SEARCH move is fundamentally different: its outcome (found/not found) depends on the hidden rat state, and the result is known immediately. If you treat SEARCH as just another node in the tree and evaluate it with evaluate(), you're double-counting — the heuristic already has a rat EV term. The right approach for Tier 1 is to evaluate the SEARCH decision separately and before evaluating carpet moves: if the best search EV clears a threshold, issue the search. Otherwise, search over movement/carpet/prime moves only.
+Problem 2: forecast_move + reverse_perspective sequencing
+This is the most common implementation bug. After forecast_move(), the returned board has had the move applied and end_turn() called, which flips is_player_a_turn. But the worker references are not swapped yet — that's what reverse_perspective() does. So after forecast_move(), player_worker still refers to the player who just moved, not the opponent.
+For 1-ply greedy, we want to evaluate from the perspective of the player who just moved — which means we need to call reverse_perspective() after forecast_move() so player_worker points to us (now the "opponent" from the new board's perspective, but our position is what we're scoring). Wait — let me think through this more carefully.
+Actually: evaluate() is written to score board.player_worker. After forecast_move() the board's player_worker is still us (we haven't reversed). After reverse_perspective() the board's player_worker becomes the opponent. So for greedy 1-ply where we want to evaluate our own resulting position, we should call evaluate() before reverse_perspective(), or call reverse_perspective() and pass enemy=True equivalent logic.
+The cleanest pattern used in the assignment hint (__init__.py) is:
+board.forecast_move(move)       # applies move, flips turn flag
+board.reverse_perspective()     # now player_worker = opponent, opponent_worker = us
+evaluate(board, belief)         # scores from opponent's view = bad for us at min node
+For 1-ply greedy we don't have a min node yet, so the simplest correct approach: after forecast_move(), call reverse_perspective(), then call evaluate(). Since evaluate() scores from player_worker's perspective and player_worker is now the opponent after reversal, we negate the result to get our score. Or — don't reverse, and evaluate directly, since player_worker is still us. That's simpler for Tier 1. I'll do the non-reversed version for now and document clearly why, so the Tier 2 expectiminimax transition is clean.
+Problem 3: Time budget enforcement
+With 240 seconds over 40 turns, average is 6 seconds/move. For 1-ply greedy the move list is at most ~30 moves and each forecast is cheap — this will finish in milliseconds. But I need to build the time-check infrastructure now so Tier 2 can use it. The pattern: check time_left_func() after each node evaluation, abort and return best-so-far if budget is tight.
+Problem 4: The search EV threshold
+From rat_belief.search_ev(): EV = 6p - 2. A search breaks even at p = 1/3. But should the threshold be exactly 0? Not necessarily — if there are good carpet moves available, you should only search if the EV clearly beats what you'd gain from the best carpet move. For Tier 1 I'll use a simple threshold with a tunable constant, and compare it against the best carpet score.
+Structure
+pythondef best_move(board, belief: RatBelief, time_left_func) -> Move
+That's the only public function. Internally:
+
+_greedy_best_move(board, belief_array, time_left_func) — evaluates all non-search moves
+The search decision happens at the top of best_move before the greedy loop
+
+
+Now writing:Created a file, read a fileCreated a file, read a fileHere's what to scrutinize honestly:
+The search vs. carpet comparison is a hack and I'm flagging it explicitly. The problem is that search_ev is in raw point units while best_nonsearch_score is in heuristic units (scaled by W_SCORE_DELTA = 10.0). Multiplying search_ev * W_SCORE_DELTA to compare them assumes the heuristic score is dominated by the score delta term, which is roughly true early-game but breaks down when potential terms are large. The right fix in Tier 2 is to include SEARCH as a leaf node in the expectiminimax tree with its own EV calculation. For Tier 1 this approximation is acceptable but you should watch whether your bot searches too aggressively or not enough.
+check_ok=False in forecast_move. I passed this because get_valid_moves() already validates legality, so re-validating inside forecast_move is redundant work. This is safe as long as we're only feeding it moves from get_valid_moves(). If you ever call _greedy_best_move with a manually constructed move list, this assumption breaks silently.
+The perspective note in the docstring is the most important thing to read before writing Tier 2. The current 1-ply greedy evaluates our position after our move, which is correct. But when you add a min layer for the opponent's response in Tier 2, you'll need reverse_perspective() before recursing, and scores at opponent nodes need to be negated. If you forget this, the opponent will appear to maximize your score instead of minimize it — one of the hardest bugs to spot because the bot still plays legal moves, it just plays terribly.
+One real design weakness: right now TIME_RESERVE = 0.1 seconds. For 1-ply greedy that's fine. For a depth-3 expectiminimax with a branching factor of ~20, you could enter a node with 0.15 seconds left and not return before the budget is exhausted. When you move to Tier 2, this needs to become iterative deepening with a time check at the top of each depth iteration, not just inside the leaf loop.
