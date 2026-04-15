@@ -1,8 +1,8 @@
 import numpy as np
 from game.move import Move
 from game.enums import MoveType
-from heuristic import evaluate
-from rat_belief import RatBelief
+from .heuristic import evaluate, W_SCORE_DELTA
+from .rat_belief import RatBelief
 
 # ---------------------------------------------------------------------------
 # Tunable search parameters
@@ -77,7 +77,6 @@ def best_move(board, belief: RatBelief, time_left_func) -> Move:
     if should_search:
         # Convert search EV to approximate heuristic scale for comparison.
         # W_SCORE_DELTA in heuristic.py is 10.0, so 1 raw point ≈ 10 heuristic units.
-        from heuristic import W_SCORE_DELTA
         search_heuristic_equiv = search_ev * W_SCORE_DELTA
 
         if best_nonsearch_move is None or search_heuristic_equiv > best_nonsearch_score:

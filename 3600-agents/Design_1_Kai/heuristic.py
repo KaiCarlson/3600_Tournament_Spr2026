@@ -13,7 +13,7 @@ W_SCORE_DELTA = 10.0
 # How much to weight each unit of immediately rollable carpet potential.
 # "Immediately rollable" means a contiguous primed run you could carpet right now.
 # Weighted by the points that roll would actually score.
-W_ROLLABLE_POTENTIAL = 2.0
+W_ROLLABLE_POTENTIAL = 2.8
 
 # How much to weight primed cells that are NOT yet rollable (future setup value).
 # Discounted by manhattan distance from your worker, since far cells may never pay off.
@@ -22,7 +22,7 @@ W_PRIMED_FUTURE = 0.4
 # Distance decay base for future primed cell value.
 # Value of a primed cell k steps away = W_PRIMED_FUTURE * (DISTANCE_DECAY ^ k)
 # Set < 1.0 so distant cells matter less. Closer to 0 = more aggressive discounting.
-DISTANCE_DECAY = 0.75
+DISTANCE_DECAY = 0.76
 
 # How much to weight the best available rat search EV.
 # Rat EV is already in point units (6p - 2), so this should stay near 1.0.
@@ -32,7 +32,7 @@ W_RAT_EV = 1.0
 # How much to penalize the opponent having rollable potential.
 # Setting this > 0 makes the bot account for the opponent's threats.
 # Start low — overweighting this can cause overly defensive play.
-W_OPPONENT_ROLLABLE = 0.5
+W_OPPONENT_ROLLABLE = 0.6
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,22 @@
+PLAN
+
+Recommended Architecture
+Here's what I'd actually build, in priority order:
+Tier 1 (get to 70-80%):
+
+A solid HMM rat tracker
+A greedy carpet heuristic that correctly values carpet potential (not just current primed squares)
+Time management: set a hard per-move time budget and fall back to a shallower search
+
+Tier 2 (get to 80-90%):
+
+Expectiminimax with alpha-beta pruning, depth 2-3
+Incorporate rat EV into the heuristic (but outside the minimax tree — don't branch on 64 rat positions at every node, just add rat EV as a heuristic term)
+Opponent modeling: penalize moves that gift long carpet lines to the opponent
+
+Tier 3 (90%+):
+
+Deeper search with iterative deepening (use your remaining time budget, not a fixed depth)
+Better heuristic tuning — this is where empirical testing against yourself pays off
+Consider whether the rat guess decision benefits from being in the tree vs. a separate policy
+

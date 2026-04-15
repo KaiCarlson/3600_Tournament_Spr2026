@@ -1,0 +1,6 @@
+# Ignore all Python cache folders everywhere
+__pycache__/
+*.pyc
+
+# Ignore all matches folders inside 3600-agents (any depth)
+3600-agents/**/matches/
