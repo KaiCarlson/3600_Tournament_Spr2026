@@ -33,7 +33,6 @@ class PlayerAgent:
 
         self.dist_table = self._precompute_distances()
         self.last_opponent_search_seen = None
-        self.turn_number = 0
 
         # Observation models from rat.py / assignment
         self.noise_probs = {
@@ -64,6 +63,7 @@ class PlayerAgent:
         variables. Return a valid move from this function.
         """
         # rat probability calc
+        self._incorporate_opponent_search(board)
         self.belief = self.belief @ self.T
         noise, est_dist = sensor_data
         self._update_belief_from_sensor(board, noise, est_dist)
@@ -71,9 +71,54 @@ class PlayerAgent:
         best_loc = self._index_to_loc(best_idx)
         best_p = float(self.belief[best_idx])
 
+        if best_p > 0.5:
+            return move.Move.search(best_loc)
 
-        moves = board.get_valid_moves()
-        return random.choice(moves)
+        valid_moves = board.get_valid_moves(exclude_search=True)
+        if not valid_moves:
+            return move.Move.search(best_loc)
+        best_move = None
+        best_score = -float("inf")
+        for mv in valid_moves:
+            score = self._score_move(board, mv)
+            if score > best_score:
+                best_score = score
+                best_move = mv
+
+        return best_move if best_move is not None else valid_moves[0]
+
+    def _incorporate_opponent_search(self, board):
+        loc, success = board.opponent_search
+
+        tag = (loc, success)
+        if loc is None or tag == self.last_opponent_search_seen:
+            return
+
+        self.last_opponent_search_seen = tag
+
+        idx = self._loc_to_index(loc)
+
+        if success:
+            # New rat spawned and took 1000 hidden moves before next turn
+            self.belief = np.zeros(self.n, dtype=np.float64)
+            self.belief[0] = 1.0
+            for _ in range(1000):
+                self.belief = self.belief @ self.T
+        else:
+            # Rat was not at searched cell at search time.
+            # Approximation: zero it out now, then renormalize.
+            self.belief[idx] = 0.0
+            self._renormalize()
+
+    def _precompute_distances(self):
+        table = {}
+        cells = [(x, y) for y in range(8) for x in range(8)]
+        for a in cells:
+            inner = {}
+            for b in cells:
+                inner[b] = abs(a[0] - b[0]) + abs(a[1] - b[1])
+            table[a] = inner
+        return table
 
     def _update_belief_from_sensor(self, board, noise, est_dist):
         my_pos = board.player_worker.get_location()
@@ -113,3 +158,65 @@ class PlayerAgent:
 
     def _index_to_loc(self, idx):
         return (idx % 8, idx // 8)
+
+    def _loc_to_index(self, pos):
+        x, y = pos
+        return y * 8 + x
+
+    def _renormalize(self):
+        s = self.belief.sum()
+        if s <= 0:
+            self.belief[:] = 1.0 / 64.0
+        else:
+            self.belief /= s
+
+    def _score_move(self, board, mv):
+        next_board = board.forecast_move(mv, check_ok=True)
+        if next_board is None:
+            return -1e18
+
+        score = 0.0
+
+        me_now = board.player_worker.get_points()
+        me_next = next_board.player_worker.get_points()
+
+        # Immediate score gain
+        score += 20.0 * (me_next - me_now)
+
+        # Position after move
+        next_pos = next_board.player_worker.get_location()
+
+        # Get closer to likely rat cells
+        rat_term = 0.0
+        for idx, p in enumerate(self.belief):
+            if p < 1e-6:
+                continue
+            pos = self._index_to_loc(idx)
+            rat_term -= p * self.dist_table[next_pos][pos]
+        score += 0.2 * rat_term
+
+        # Favor carpet opportunities created for future turns
+        score += 3.0 * self._future_carpet_potential(next_board)
+
+        # Prefer denying opponent access a little
+        score -= 1.5 * self._opponent_future_potential(next_board)
+
+        return score
+
+    def _future_carpet_potential(self, board):
+        total = 0.0
+        for mv in board.get_valid_moves(exclude_search=True):
+            if mv.move_type == enums.MoveType.CARPET:
+                # nonlinear carpet rewards matter a lot
+                total += [0, -1, 2, 4, 6, 10, 15, 21][mv.roll_length]
+        return total
+
+    def _opponent_future_potential(self, board):
+        sim = board.get_copy()
+        sim.reverse_perspective()
+        total = 0.0
+        for mv in sim.get_valid_moves(exclude_search=True):
+            if mv.move_type == enums.MoveType.CARPET:
+                total += [0, -1, 2, 4, 6, 10, 15, 21][mv.roll_length]
+        return total
+
