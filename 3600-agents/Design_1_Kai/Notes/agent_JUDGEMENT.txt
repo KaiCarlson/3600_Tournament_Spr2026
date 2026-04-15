@@ -1,0 +1,56 @@
+agent_JUDGEMENT
+
+Planning agent.py
+Exact engine contract — confirmed from source
+From player_process.py:
+pythonplayer = module.PlayerAgent(temp_board, transition_matrix, time_left_func)
+player_move = player.play(temp_board, rat_samples, time_left_func)
+message = player.commentate()
+Three things to note:
+
+transition_matrix passed to __init__ is a raw JAX array from gameplay.py. Our RatBelief.__init__ already handles this with np.array(T, dtype=np.float64).
+rat_samples is (Noise, int) — confirmed from rat.py.
+time_left_func in play() is a fresh closure each turn: time_left - (get_cur_time() - start). It counts down from board.player_worker.time_left, NOT from 240. So calling it early in play() returns a large number, and it shrinks as your turn progresses. This is the correct value to pass to search.best_move.
+
+opponent_search format — confirmed from source
+From gameplay.py line 466: board.opponent_search = searches[-1] where searches is a deque of (search_loc, search_result) tuples. search_loc is None if the opponent didn't search, search_result is True/False. This matches exactly what rat_belief.observe_opponent_search(loc, found) expects.
+player_search — your OWN last search result
+From line 467: board.player_search = searches[-2]. This is your own previous search result, delivered back to you by the engine. This is how you find out if your own SEARCH move succeeded — you don't learn it in the same turn you make it, you learn it next turn via board.player_search. This has a direct implication for belief updating.
+The belief update order in play() — this is the most critical thing to get right
+Every turn, by the time play() is called:
+
+The rat has already moved (rat.move())
+You've received the observation (rat_samples)
+The board reflects the opponent's last move (via reverse_perspective)
+board.opponent_search reflects what the opponent just did
+board.player_search reflects what YOU did last turn
+
+So the correct update sequence inside play() is:
+1. predict()                          — rat already moved, push belief forward
+2. update(noise, dist, pos, board)    — incorporate this turn's observation
+3. observe_opponent_search(...)       — hard update if opponent searched this turn
+4. observe_own_search(...)            — hard update from YOUR last turn's search result
+5. search.best_move(...)              — now make a decision
+Step 4 is easy to miss. You don't know if your own search hit until the next turn. board.player_search gives you that result. If you skip this, your belief after a miss will still have probability mass on the cell you searched, which is wrong.
+agent.py must stay thin
+No carpet logic, no belief math, no heuristic calls. Just:
+
+Store RatBelief instance
+Each turn: update belief in the right order, call search.best_move, return the move
+commentate() returns a debug string
+
+Creating agent.pyCreating agent.pyNow the __init__.py:Created a file, read a fileCreated a file, read a fileTwo things to verify before running anything:
+The board.player_search timing. Confirmed in gameplay.py line 467: board.player_search = searches[-2], set after reverse_perspective(). So by the time your play() receives the board, player_search reflects what you did the turn before last from the engine's perspective — which is your previous turn. The logic in play() is correct. But on turn 1, player_search will be (None, False) since you haven't searched yet, and the if own_loc is not None guard handles that cleanly.
+_last_move is stored but never used. I originally planned to use it as a redundant self-check, but board.player_search is authoritative and already gives us the result — we don't need to re-derive it. The field is harmless but it's dead weight. You can remove it.
+
+Tier 1 vs Tier 2 — what to do next
+My honest recommendation: get Tier 1 running and playing games before touching Tier 2.
+Here's why. Right now you have a complete but completely untested system. There are almost certainly bugs — not in the logic we discussed, but in wiring: wrong argument order somewhere, a perspective that's flipped, a belief that never spikes because of a subtle normalization issue. You won't find those by reading the code. You'll find them by running games and watching the bot play.
+Specifically, before tuning weights or building expectiminimax, you should verify:
+
+The bot makes legal moves every turn and doesn't crash or time out
+The belief state actually sharpens over time (print belief.max() in commentate() — if it stays near 1/64 ≈ 0.016 all game, the HMM is broken)
+The bot does something sensible — primes squares, rolls carpet when it can, occasionally searches
+
+Only after that does tuning make sense. Tuning broken weights on a broken heuristic produces nothing. And building expectiminimax on top of a greedy bot that crashes is a waste of time.
+So: run games first, fix bugs, then tune, then Tier 2.

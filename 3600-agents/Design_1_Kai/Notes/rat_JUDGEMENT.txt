@@ -1,0 +1,54 @@
+rat_JUDGEMENT
+
+Planning rat_belief.py Before Writing a Line
+What the HMM needs to do
+Every turn, the engine calls rat.move() then rat.sample(board) before your play() is called. So by the time you receive rat_samples, the rat has already moved this turn. That means the update order inside your belief tracker must be:
+
+Predict — push belief through T (rat already moved)
+Update — reweight by the observation you just received
+
+What rat_samples actually is
+From gameplay.py: samples = rat.sample(board) — this returns a (noise_type, estimated_distance) tuple. The noise type encodes what floor the rat is under (Squeak/Scratch/Squeal probabilities differ by cell type). The distance is a noisy manhattan distance from your worker to the rat.
+The observation model inversion problem — spelled out
+This is where most implementations go wrong. The tables give you:
+Noise likelihood by floor type:
+FloorSqueakScratchSquealBlocked0.50.30.2Space0.70.150.15Primed0.10.80.1Carpet0.10.10.8
+Distance measurement error:
+Reported vs actualPOne less than actual0.12Correct0.70One more than actual0.12Two more than actual0.06(capped at 0 from below)
+To update belief at cell i, you need P(observation | rat is at cell i). This means:
+
+For noise: look up P(noise_type | floor_type_at_i)
+For distance: the actual distance from your worker to cell i is d_actual. The reported distance d_reported came from that. So you need P(d_reported | d_actual), which you read directly from the error table.
+
+The trap is computing P(d_actual | d_reported) instead, i.e. flipping the conditioning. Don't do that. You're computing a likelihood, not a posterior.
+The floor-type edge case: The rat can be under blocked squares. The noise emission table has a row for Blocked. You need to handle this — don't skip blocked cells when building the observation likelihood.
+The distance cap edge case: The rules say "your worker will never estimate less than zero." This means if the actual distance is 0 or 1, some probability mass that would have been reported as negative gets folded into the 0 bin. You need to handle this correctly or your likelihoods won't sum right near the worker.
+Opponent search info: The board gives you board.opponent_search = ((x,y), bool). If your opponent searched and found/missed, that's a hard update — it tells you the rat was or was not at that cell. Use it. Most people ignore this and leave free information on the table.
+What methods the class needs
+pythonclass RatBelief:
+    def __init__(self, T: np.ndarray)
+    def predict(self) -> None                          # forward: belief = belief @ T
+    def update(self, noise, dist, worker_pos, board) -> None   # reweight by likelihood
+    def observe_opponent_search(self, loc, found) -> None      # hard update from opponent
+    def reset_after_catch(self) -> None               # rat respawns, belief goes uniform
+    def get_belief(self) -> np.ndarray                # shape (64,), sums to 1
+    def search_ev(self, loc) -> float                 # 4*p - 2*(1-p) = 6*p - 2
+    def best_search_target(self) -> tuple[tuple, float]  # (loc, ev)
+The reset problem
+When the rat is caught (by you or your opponent), a new rat spawns and takes 1000 random steps. You don't observe those steps. After a catch, you have zero information about the new rat's location. The right thing to do is reset to the stationary distribution of T, not uniform — because after 1000 steps, the rat's distribution has converged. You can compute this by taking T to a large power, or solving for the left eigenvector. Uniform is an acceptable approximation but stationary is strictly better.
+Representation
+
+Belief is a flat numpy array of shape (64,) where index i = y*8 + x
+T is (64, 64) where T[i,j] = P(i → j), so belief @ T does the prediction step correctly (row vector times transition matrix)
+Keep numpy, not JAX, for this — it's fast enough for 64 states and avoids JAX's compilation overhead on small arrays
+
+
+Now I'll write the code.Created a file, read a fileCreated a file, read a fileHere's what to scrutinize before you accept this:
+Three things that could be wrong and you should verify:
+
+The rat_samples format. I assumed samples is a (noise_type_string, reported_dist_int) tuple based on the spec. But the actual rat.sample() implementation is in game/rat.py which you have and I don't. Before wiring this into agent.py, print a raw sample and confirm the types — specifically whether noise comes in as a string, an enum, or something else. If it's an enum, the _NOISE_INDEX lookup will silently return None and the update will be uninformative.
+The predict() call timing. I documented that you should call predict() first because the rat already moved before your play() is called. Confirm this in gameplay.py — look at the order of rat.move(), rat.sample(), and player.play(). It does match my reading, but double-check it yourself.
+The stationary distribution initialization. I compute it by squaring T ten times (2^10 = 1024 steps). This is fine for a well-connected chain, but if T has absorbing states or near-zero rows for blocked cells the convergence could be off. Print self._stationary.sum() and eyeball that it looks reasonable (no single cell has >5% probability) before trusting it.
+
+One design decision I made that you might disagree with:
+observe_opponent_search and observe_own_search are separate methods even though they're nearly identical. The reason is that your own search happens inside your turn while you're building the move, whereas the opponent's search is applied at the start of the next turn from board.opponent_search. Keeping them named separately makes the call sites in agent.py unambiguous.
