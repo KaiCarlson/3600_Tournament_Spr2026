@@ -49,7 +49,7 @@ from typing import Optional
 GAMES_PER_CONFIG = 30
 
 # Agent name (folder under 3600-agents/ that contains agent.py).
-AGENT_NAME = "Design_1_Kai"
+AGENT_NAME = "Design_2_Kai"
 
 # Run configs sequentially (False) or in parallel (True).
 # Parallel is faster but noisier; set False if you hit import conflicts.
@@ -61,45 +61,53 @@ PARALLEL = False
 # ---------------------------------------------------------------------------
 
 WEIGHT_GRID = [
-    # New winner — exact rerun for confirmation
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.5, W_PRIMED_FUTURE=0.4,
-         DISTANCE_DECAY=0.78, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.6),
-
-    # Roll nudge up — does 2.5 plateau or keep climbing?
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.4,
-         DISTANCE_DECAY=0.78, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.6),
-
-    # Roll nudge down slightly — is 2.5 a peak or a floor?
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.2, W_PRIMED_FUTURE=0.4,
-         DISTANCE_DECAY=0.78, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.6),
-
-    # Decay tighter — winner was 0.78, previous winner was 0.75. Is 0.76 better?
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.5, W_PRIMED_FUTURE=0.4,
-         DISTANCE_DECAY=0.76, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.6),
-
-    # Decay looser by a hair — 0.78 beat 0.80 badly, but is 0.79 still ok?
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.5, W_PRIMED_FUTURE=0.4,
-         DISTANCE_DECAY=0.79, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.6),
-
-    # Opp nudge down — 0.7 hurt badly, 0.6 won, 0.5 was decent. Is 0.55 a sweet spot?
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.5, W_PRIMED_FUTURE=0.4,
-         DISTANCE_DECAY=0.78, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.55),
-
-    # Opp nudge up cautiously — 0.65, before the 0.7 cliff
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.5, W_PRIMED_FUTURE=0.4,
-         DISTANCE_DECAY=0.78, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.65),
-
-    # Primed even lower — 0.4 has consistently beaten everything higher. Try 0.2.
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.5, W_PRIMED_FUTURE=0.2,
-         DISTANCE_DECAY=0.78, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.6),
-
-    # Rat EV bump — hasn't been tested near the winner. Does 1.2 help?
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.5, W_PRIMED_FUTURE=0.4,
-         DISTANCE_DECAY=0.78, W_RAT_EV=1.2, W_OPPONENT_ROLLABLE=0.6),
-
-    # Best guess combo — roll up, decay tighter, opp slightly trimmed
+    # Config 1 — current baseline, must be first
     dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.4,
          DISTANCE_DECAY=0.76, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.6),
+
+    # Config 2 — rat EV up: now that searches actually fire, does rewarding
+    # belief spikes more aggressively improve play?
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.4,
+         DISTANCE_DECAY=0.76, W_RAT_EV=1.5, W_OPPONENT_ROLLABLE=0.6),
+
+    # Config 3 — rat EV up more: is 2.0 too greedy or genuinely better?
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.4,
+         DISTANCE_DECAY=0.76, W_RAT_EV=2.0, W_OPPONENT_ROLLABLE=0.6),
+
+    # Config 4 — rat EV down: maybe 1.0 is still too high and rat chasing
+    # is costing carpet turns even with the fixed threshold
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.4,
+         DISTANCE_DECAY=0.76, W_RAT_EV=0.5, W_OPPONENT_ROLLABLE=0.6),
+
+    # Config 5 — roll down slightly + rat up: compensate for turns lost to
+    # searching by valuing carpet potential a little less
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.5, W_PRIMED_FUTURE=0.4,
+         DISTANCE_DECAY=0.76, W_RAT_EV=1.5, W_OPPONENT_ROLLABLE=0.6),
+
+    # Config 6 — kill primed future entirely: with depth-3 the tree already
+    # captures near-term setups. Is this term adding noise?
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.0,
+         DISTANCE_DECAY=0.76, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.6),
+
+    # Config 7 — opp rollable up: depth-3 lookahead makes defensive play
+    # more coherent. Does penalizing opponent threats more help?
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.4,
+         DISTANCE_DECAY=0.76, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.8),
+
+    # Config 8 — opp rollable down: maybe depth-3 already handles threats
+    # implicitly and the explicit penalty is redundant
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.4,
+         DISTANCE_DECAY=0.76, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.4),
+
+    # Config 9 — best guess combo for new regime: rat up, primed gone,
+    # opp slightly higher to use depth-3 defensively
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.0,
+         DISTANCE_DECAY=0.76, W_RAT_EV=1.5, W_OPPONENT_ROLLABLE=0.7),
+
+    # Config 10 — roll up + rat up: if the bot is searching more and scoring
+    # more rat points, does valuing carpet potential even higher compound that?
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=3.2, W_PRIMED_FUTURE=0.4,
+         DISTANCE_DECAY=0.76, W_RAT_EV=1.5, W_OPPONENT_ROLLABLE=0.6),
 ]
 
 # ---------------------------------------------------------------------------
