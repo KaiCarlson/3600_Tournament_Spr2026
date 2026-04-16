@@ -28,6 +28,17 @@ SEARCH_MARGIN = 2.0
 # ---------------------------------------------------------------------------
 # Public interface — unchanged from Tier 1, agent.py needs no edits
 # ---------------------------------------------------------------------------
+def _move_order_key(move):
+    # Carpet first, and among carpets prefer longer rolls
+    if move.move_type == MoveType.CARPET:
+        return (3, getattr(move, "roll_length", 0))
+
+    # Then prime
+    if move.move_type == MoveType.PRIME:
+        return (2, 0)
+
+    # Then plain
+    return (1, 0)
 
 def best_move(board, belief: RatBelief, time_left_func) -> Move:
     """
@@ -82,10 +93,20 @@ def best_move(board, belief: RatBelief, time_left_func) -> Move:
     # The old code compared search_ev * W_SCORE_DELTA against best_score_so_far
     # directly, which meant search almost never triggered because best_score_so_far
     # is a large absolute value (includes accumulated score delta * 10).
-    if search_ev > RAT_SEARCH_EV_THRESHOLD:
-        tree_marginal_pts = best_score_so_far / W_SCORE_DELTA
-        if best_move_so_far is None or search_ev > tree_marginal_pts + SEARCH_MARGIN:
-            return Move.search(search_loc)
+    turns_left = board.player_worker.turns_left
+
+    if turns_left > 20:
+        min_search_ev = 1.5
+    elif turns_left > 10:
+        min_search_ev = 1.0
+    else:
+        min_search_ev = 0.5
+
+    from .heuristic import _best_rollable_score
+    best_roll_now = _best_rollable_score(board)
+
+    if search_ev >= min_search_ev and best_roll_now < 4:
+        return Move.search(search_loc)
 
     if best_move_so_far is not None:
         return best_move_so_far
@@ -116,7 +137,11 @@ def _negamax_root(
         convention). At the root that's us, so scores are directly our score —
         higher is better.
     """
-    moves = board.get_valid_moves(exclude_search=True)
+    moves = sorted(
+        board.get_valid_moves(exclude_search=True),
+        key=_move_order_key,
+        reverse=True,
+    )
 
     best_move_found = None
     best_score = float('-inf')
@@ -211,7 +236,11 @@ def _negamax(
     if depth == 0 or board.is_game_over():
         return evaluate(board, belief_array)
 
-    moves = board.get_valid_moves(exclude_search=True)
+    moves = sorted(
+        board.get_valid_moves(exclude_search=True),
+        key=_move_order_key,
+        reverse=True,
+    )
 
     if not moves:
         return evaluate(board, belief_array)

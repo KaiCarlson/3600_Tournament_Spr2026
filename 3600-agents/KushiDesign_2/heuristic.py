@@ -17,7 +17,7 @@ W_ROLLABLE_SUM = 2.8
 
 W_ROLLABLE_BEST = 2.0
 
-W_ONE_MOVE_AWAY = 0.6
+W_ONE_MOVE_AWAY = 0.8
 # How much to weight primed cells that are NOT yet rollable (future setup value).
 # Discounted by manhattan distance from your worker, since far cells may never pay off.
 W_PRIMED_FUTURE = 0.15 #.4 2nd
@@ -36,7 +36,7 @@ W_RAT_EV = 0.5 #2.0 2nd
 # Setting this > 0 makes the bot account for the opponent's threats.
 # Start low — overweighting this can cause overly defensive play.
 W_OPPONENT_ROLLABLE_SUM = 0.4
-W_OPPONENT_ROLLABLE_BEST = 0.8
+W_OPPONENT_ROLLABLE_BEST = 0.9
 
 W_MOBILITY = 0.15
 
