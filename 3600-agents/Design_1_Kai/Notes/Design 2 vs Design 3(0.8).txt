@@ -1,0 +1,218 @@
+Design 2 vs Design 3(0.8)
+
+PS C:\Users\kai22\GT\CS 3600\Tournament\distb4repo\engine> python run_matches.py Design_2_Kai Design_3_Kai 40
+   Agent A : Design_2_Kai
+   Agent B : Design_3_Kai
+     Games : 40
+
+Player A message: Final belief peak: 0.029 at (6, 7), search EV=-1.824
+Player B message: Final belief peak: 0.029 at (6, 7), search EV=-1.824
+  Game   1: A= +46  B= +50  B wins  (POINTS)
+           A: Final belief peak: 0.029 at (6, 7), search EV=-1.824
+           B: Final belief peak: 0.029 at (6, 7), search EV=-1.824
+Player A message: Final belief peak: 0.212 at (6, 0), search EV=-0.726
+Player B message: Final belief peak: 0.721 at (4, 2), search EV=2.327
+  Game   2: A= +25  B= +41  B wins  (POINTS)
+           A: Final belief peak: 0.212 at (6, 0), search EV=-0.726
+           B: Final belief peak: 0.721 at (4, 2), search EV=2.327
+Player A message: Final belief peak: 0.224 at (1, 0), search EV=-0.658
+Player B message: Final belief peak: 0.442 at (1, 2), search EV=0.653
+  Game   3: A= +37  B= +52  B wins  (POINTS)
+           A: Final belief peak: 0.224 at (1, 0), search EV=-0.658
+           B: Final belief peak: 0.442 at (1, 2), search EV=0.653
+Player A message: Final belief peak: 0.505 at (7, 6), search EV=1.032
+Player B message: Final belief peak: 0.026 at (3, 6), search EV=-1.842
+  Game   4: A= +38  B= +65  B wins  (POINTS)
+           A: Final belief peak: 0.505 at (7, 6), search EV=1.032
+           B: Final belief peak: 0.026 at (3, 6), search EV=-1.842
+Player A message: Final belief peak: 0.553 at (5, 4), search EV=1.315
+Player B message: Final belief peak: 0.580 at (6, 4), search EV=1.481
+  Game   5: A= +41  B= +26  A wins  (POINTS)
+           A: Final belief peak: 0.553 at (5, 4), search EV=1.315
+           B: Final belief peak: 0.580 at (6, 4), search EV=1.481
+Player A message: Final belief peak: 0.277 at (6, 3), search EV=-0.337
+Player B message: Final belief peak: 0.456 at (5, 1), search EV=0.733
+  Game   6: A= +26  B= +45  B wins  (POINTS)
+           A: Final belief peak: 0.277 at (6, 3), search EV=-0.337
+           B: Final belief peak: 0.456 at (5, 1), search EV=0.733
+Player A message: Final belief peak: 0.199 at (4, 4), search EV=-0.807
+Player B message: Final belief peak: 0.316 at (7, 2), search EV=-0.104
+  Game   7: A= +23  B= +66  B wins  (POINTS)
+           A: Final belief peak: 0.199 at (4, 4), search EV=-0.807
+           B: Final belief peak: 0.316 at (7, 2), search EV=-0.104
+Player A message: Final belief peak: 0.467 at (1, 2), search EV=0.800
+Player B message: Final belief peak: 0.279 at (5, 3), search EV=-0.327
+  Game   8: A= +42  B=  +4  A wins  (POINTS)
+           A: Final belief peak: 0.467 at (1, 2), search EV=0.800
+           B: Final belief peak: 0.279 at (5, 3), search EV=-0.327
+Player A message: Final belief peak: 0.238 at (1, 4), search EV=-0.572
+Player B message: Final belief peak: 0.296 at (2, 5), search EV=-0.222
+  Game   9: A= -10  B= +48  B wins  (POINTS)
+           A: Final belief peak: 0.238 at (1, 4), search EV=-0.572
+           B: Final belief peak: 0.296 at (2, 5), search EV=-0.222
+Player A message: Final belief peak: 0.554 at (5, 2), search EV=1.322
+Player B message: Final belief peak: 0.317 at (6, 2), search EV=-0.099
+  Game  10: A= +24  B= +40  B wins  (POINTS)
+           A: Final belief peak: 0.554 at (5, 2), search EV=1.322
+           B: Final belief peak: 0.317 at (6, 2), search EV=-0.099
+Player A message: Final belief peak: 0.298 at (4, 5), search EV=-0.214
+Player B message: Final belief peak: 0.206 at (7, 2), search EV=-0.761
+  Game  11: A= +31  B= +28  A wins  (POINTS)
+           A: Final belief peak: 0.298 at (4, 5), search EV=-0.214
+           B: Final belief peak: 0.206 at (7, 2), search EV=-0.761
+Player A message: Final belief peak: 0.272 at (5, 1), search EV=-0.370
+Player B message: Final belief peak: 0.462 at (6, 1), search EV=0.774
+  Game  12: A= +54  B= +39  A wins  (POINTS)
+           A: Final belief peak: 0.272 at (5, 1), search EV=-0.370
+           B: Final belief peak: 0.462 at (6, 1), search EV=0.774
+Player A message: Final belief peak: 0.520 at (3, 1), search EV=1.117
+Player B message: Final belief peak: 0.471 at (6, 1), search EV=0.823
+  Game  13: A= +37  B= +36  A wins  (POINTS)
+           A: Final belief peak: 0.520 at (3, 1), search EV=1.117
+           B: Final belief peak: 0.471 at (6, 1), search EV=0.823
+Player A message: Final belief peak: 0.193 at (4, 7), search EV=-0.840
+Player B message: Final belief peak: 0.164 at (6, 4), search EV=-1.018
+  Game  14: A= +31  B= +48  B wins  (POINTS)
+           A: Final belief peak: 0.193 at (4, 7), search EV=-0.840
+           B: Final belief peak: 0.164 at (6, 4), search EV=-1.018
+Player A message: Final belief peak: 0.801 at (4, 7), search EV=2.805
+Player B message: Final belief peak: 0.258 at (5, 7), search EV=-0.453
+  Game  15: A= +43  B= +22  A wins  (POINTS)
+           A: Final belief peak: 0.801 at (4, 7), search EV=2.805
+           B: Final belief peak: 0.258 at (5, 7), search EV=-0.453
+Player A message: Final belief peak: 0.267 at (1, 0), search EV=-0.398
+Player B message: Final belief peak: 0.301 at (4, 2), search EV=-0.194
+  Game  16: A= +20  B= +32  B wins  (POINTS)
+           A: Final belief peak: 0.267 at (1, 0), search EV=-0.398
+           B: Final belief peak: 0.301 at (4, 2), search EV=-0.194
+Player A message: Final belief peak: 0.472 at (0, 5), search EV=0.832
+Player B message: Final belief peak: 0.194 at (1, 4), search EV=-0.834
+  Game  17: A= +24  B= +66  B wins  (POINTS)
+           A: Final belief peak: 0.472 at (0, 5), search EV=0.832
+           B: Final belief peak: 0.194 at (1, 4), search EV=-0.834
+Player A message: Final belief peak: 0.435 at (0, 4), search EV=0.610
+Player B message: Final belief peak: 0.777 at (6, 5), search EV=2.665
+  Game  18: A= +52  B= +37  A wins  (POINTS)
+           A: Final belief peak: 0.435 at (0, 4), search EV=0.610
+           B: Final belief peak: 0.777 at (6, 5), search EV=2.665
+Player A message: Final belief peak: 0.542 at (7, 6), search EV=1.250
+Player B message: Final belief peak: 0.415 at (5, 7), search EV=0.488
+  Game  19: A= +37  B= +31  A wins  (POINTS)
+           A: Final belief peak: 0.542 at (7, 6), search EV=1.250
+           B: Final belief peak: 0.415 at (5, 7), search EV=0.488
+Player A message: Final belief peak: 0.275 at (5, 3), search EV=-0.348
+Player B message: Final belief peak: 0.267 at (2, 5), search EV=-0.397
+  Game  20: A= +36  B= +52  B wins  (POINTS)
+           A: Final belief peak: 0.275 at (5, 3), search EV=-0.348
+           B: Final belief peak: 0.267 at (2, 5), search EV=-0.397
+Player A message: Final belief peak: 0.431 at (7, 7), search EV=0.585
+Player B message: Final belief peak: 0.282 at (5, 7), search EV=-0.307
+  Game  21: A= +46  B= +39  A wins  (POINTS)
+           A: Final belief peak: 0.431 at (7, 7), search EV=0.585
+           B: Final belief peak: 0.282 at (5, 7), search EV=-0.307
+Player A message: Final belief peak: 0.478 at (1, 6), search EV=0.870
+Player B message: Final belief peak: 0.718 at (0, 6), search EV=2.307
+  Game  22: A= +45  B= +36  A wins  (POINTS)
+           A: Final belief peak: 0.478 at (1, 6), search EV=0.870
+           B: Final belief peak: 0.718 at (0, 6), search EV=2.307
+Player A message: Final belief peak: 0.263 at (0, 7), search EV=-0.423
+Player B message: Final belief peak: 0.529 at (5, 0), search EV=1.174
+  Game  23: A= +24  B= +33  B wins  (POINTS)
+           A: Final belief peak: 0.263 at (0, 7), search EV=-0.423
+           B: Final belief peak: 0.529 at (5, 0), search EV=1.174
+Player A message: Final belief peak: 0.026 at (3, 6), search EV=-1.842
+Player B message: Final belief peak: 0.163 at (7, 7), search EV=-1.023
+  Game  24: A= +26  B= +53  B wins  (POINTS)
+           A: Final belief peak: 0.026 at (3, 6), search EV=-1.842
+           B: Final belief peak: 0.163 at (7, 7), search EV=-1.023
+Player A message: Final belief peak: 0.252 at (7, 1), search EV=-0.487
+Player B message: Final belief peak: 0.784 at (5, 7), search EV=2.705
+  Game  25: A= +41  B= +40  A wins  (POINTS)
+           A: Final belief peak: 0.252 at (7, 1), search EV=-0.487
+           B: Final belief peak: 0.784 at (5, 7), search EV=2.705
+Player A message: Final belief peak: 0.500 at (0, 7), search EV=1.001
+Player B message: Final belief peak: 0.356 at (0, 6), search EV=0.133
+  Game  26: A= +26  B= +25  A wins  (POINTS)
+           A: Final belief peak: 0.500 at (0, 7), search EV=1.001
+           B: Final belief peak: 0.356 at (0, 6), search EV=0.133
+Player A message: Final belief peak: 0.432 at (6, 3), search EV=0.591
+Player B message: Final belief peak: 0.397 at (6, 1), search EV=0.381
+  Game  27: A= +47  B= +46  A wins  (POINTS)
+           A: Final belief peak: 0.432 at (6, 3), search EV=0.591
+           B: Final belief peak: 0.397 at (6, 1), search EV=0.381
+Player A message: Final belief peak: 0.505 at (2, 2), search EV=1.033
+Player B message: Final belief peak: 0.273 at (5, 4), search EV=-0.360
+  Game  28: A= +27  B= +40  B wins  (POINTS)
+           A: Final belief peak: 0.505 at (2, 2), search EV=1.033
+           B: Final belief peak: 0.273 at (5, 4), search EV=-0.360
+Player A message: Final belief peak: 0.032 at (5, 7), search EV=-1.808
+Player B message: Final belief peak: 0.032 at (5, 7), search EV=-1.808
+  Game  29: A= +46  B= +33  A wins  (POINTS)
+           A: Final belief peak: 0.032 at (5, 7), search EV=-1.808
+           B: Final belief peak: 0.032 at (5, 7), search EV=-1.808
+Player A message: Final belief peak: 0.038 at (1, 4), search EV=-1.774
+Player B message: Final belief peak: 0.225 at (4, 0), search EV=-0.653
+  Game  30: A= +44  B= +53  B wins  (POINTS)
+           A: Final belief peak: 0.038 at (1, 4), search EV=-1.774
+           B: Final belief peak: 0.225 at (4, 0), search EV=-0.653
+Player A message: Final belief peak: 0.582 at (2, 5), search EV=1.493
+Player B message: Final belief peak: 0.367 at (2, 5), search EV=0.199
+  Game  31: A= +51  B= +32  A wins  (POINTS)
+           A: Final belief peak: 0.582 at (2, 5), search EV=1.493
+           B: Final belief peak: 0.367 at (2, 5), search EV=0.199
+Player A message: Final belief peak: 0.580 at (2, 4), search EV=1.478
+Player B message: Final belief peak: 0.851 at (2, 4), search EV=3.105
+  Game  32: A= +39  B= +36  A wins  (POINTS)
+           A: Final belief peak: 0.580 at (2, 4), search EV=1.478
+           B: Final belief peak: 0.851 at (2, 4), search EV=3.105
+Player A message: Final belief peak: 0.035 at (5, 2), search EV=-1.788
+Player B message: Final belief peak: 0.035 at (5, 2), search EV=-1.788
+  Game  33: A= +40  B= +40  TIE     (POINTS)
+           A: Final belief peak: 0.035 at (5, 2), search EV=-1.788
+           B: Final belief peak: 0.035 at (5, 2), search EV=-1.788
+Player A message: Final belief peak: 0.328 at (7, 5), search EV=-0.031
+Player B message: Final belief peak: 0.445 at (7, 4), search EV=0.669
+  Game  34: A= +46  B= +22  A wins  (POINTS)
+           A: Final belief peak: 0.328 at (7, 5), search EV=-0.031
+           B: Final belief peak: 0.445 at (7, 4), search EV=0.669
+Player A message: Final belief peak: 0.147 at (2, 2), search EV=-1.118
+Player B message: Final belief peak: 0.605 at (1, 2), search EV=1.633
+  Game  35: A= +46  B= +45  A wins  (POINTS)
+           A: Final belief peak: 0.147 at (2, 2), search EV=-1.118
+           B: Final belief peak: 0.605 at (1, 2), search EV=1.633
+Player A message: Final belief peak: 0.366 at (2, 7), search EV=0.199
+Player B message: Final belief peak: 0.306 at (0, 6), search EV=-0.164
+  Game  36: A= +41  B= +33  A wins  (POINTS)
+           A: Final belief peak: 0.366 at (2, 7), search EV=0.199
+           B: Final belief peak: 0.306 at (0, 6), search EV=-0.164
+Player A message: Final belief peak: 0.443 at (3, 5), search EV=0.659
+Player B message: Final belief peak: 0.039 at (2, 4), search EV=-1.767
+  Game  37: A= +43  B= +39  A wins  (POINTS)
+           A: Final belief peak: 0.443 at (3, 5), search EV=0.659
+           B: Final belief peak: 0.039 at (2, 4), search EV=-1.767
+Player A message: Final belief peak: 0.804 at (7, 6), search EV=2.825
+Player B message: Final belief peak: 0.518 at (6, 7), search EV=1.106
+  Game  38: A= +39  B= +38  A wins  (POINTS)
+           A: Final belief peak: 0.804 at (7, 6), search EV=2.825
+           B: Final belief peak: 0.518 at (6, 7), search EV=1.106
+Player A message: Final belief peak: 0.403 at (6, 4), search EV=0.419
+Player B message: Final belief peak: 0.627 at (7, 3), search EV=1.763
+  Game  39: A= +28  B= +52  B wins  (POINTS)
+           A: Final belief peak: 0.403 at (6, 4), search EV=0.419
+           B: Final belief peak: 0.627 at (7, 3), search EV=1.763
+Player A message: Final belief peak: 0.302 at (5, 1), search EV=-0.186
+Player B message: Final belief peak: 0.391 at (3, 7), search EV=0.346
+  Game  40: A= +30  B= +65  B wins  (POINTS)
+           A: Final belief peak: 0.302 at (5, 1), search EV=-0.186
+           B: Final belief peak: 0.391 at (3, 7), search EV=0.346
+
+============================================================
+  Results after 40 games (0 errors)  [222.5s]
+============================================================
+  Record          A: 21  B: 18  Ties: 1
+  A win rate      52.5%
+  avg A pts       35.8
+  avg B pts       40.7
+  avg total       76.5
+  std dev total   15.0
+  avg |delta|     4.9

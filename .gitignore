@@ -4,3 +4,4 @@ __pycache__/
 
 # Ignore all matches folders inside 3600-agents (any depth)
 3600-agents/**/matches/
+3600-agents/Kushi

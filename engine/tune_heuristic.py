@@ -49,7 +49,7 @@ from typing import Optional
 GAMES_PER_CONFIG = 30
 
 # Agent name (folder under 3600-agents/ that contains agent.py).
-AGENT_NAME = "Design_2_Kai"
+AGENT_NAME = "Design_3_Kai"
 
 # Run configs sequentially (False) or in parallel (True).
 # Parallel is faster but noisier; set False if you hit import conflicts.
@@ -61,53 +61,54 @@ PARALLEL = False
 # ---------------------------------------------------------------------------
 
 WEIGHT_GRID = [
-    # Config 1 — current baseline, must be first
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.4,
+    # Config 1 — current D3 baseline (W_ROLLABLE=5.0, MIN_REWARDED=3)
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=5.0, W_PRIMED_FUTURE=0.0,
          DISTANCE_DECAY=0.76, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.6),
 
-    # Config 2 — rat EV up: now that searches actually fire, does rewarding
-    # belief spikes more aggressively improve play?
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.4,
-         DISTANCE_DECAY=0.76, W_RAT_EV=1.5, W_OPPONENT_ROLLABLE=0.6),
-
-    # Config 3 — rat EV up more: is 2.0 too greedy or genuinely better?
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.4,
-         DISTANCE_DECAY=0.76, W_RAT_EV=2.0, W_OPPONENT_ROLLABLE=0.6),
-
-    # Config 4 — rat EV down: maybe 1.0 is still too high and rat chasing
-    # is costing carpet turns even with the fixed threshold
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.4,
-         DISTANCE_DECAY=0.76, W_RAT_EV=0.5, W_OPPONENT_ROLLABLE=0.6),
-
-    # Config 5 — roll down slightly + rat up: compensate for turns lost to
-    # searching by valuing carpet potential a little less
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.5, W_PRIMED_FUTURE=0.4,
-         DISTANCE_DECAY=0.76, W_RAT_EV=1.5, W_OPPONENT_ROLLABLE=0.6),
-
-    # Config 6 — kill primed future entirely: with depth-3 the tree already
-    # captures near-term setups. Is this term adding noise?
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.0,
+    # Config 2 — W=7: math says this is the first value where 3-run > roll-2
+    # and 4-run > roll-3. Should start producing longer runs.
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=7.0, W_PRIMED_FUTURE=0.0,
          DISTANCE_DECAY=0.76, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.6),
 
-    # Config 7 — opp rollable up: depth-3 lookahead makes defensive play
-    # more coherent. Does penalizing opponent threats more help?
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.4,
-         DISTANCE_DECAY=0.76, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.8),
+    # Config 3 — W=10: more aggressive, 3-run=40 ties roll-3, 4-run=60 dominates
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=10.0, W_PRIMED_FUTURE=0.0,
+         DISTANCE_DECAY=0.76, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.6),
 
-    # Config 8 — opp rollable down: maybe depth-3 already handles threats
-    # implicitly and the explicit penalty is redundant
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.4,
-         DISTANCE_DECAY=0.76, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.4),
+    # Config 4 — W=7 + opp rollable up: with longer runs, opponent threat
+    # matters more since we're leaving primed cells around longer
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=7.0, W_PRIMED_FUTURE=0.0,
+         DISTANCE_DECAY=0.76, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=1.0),
 
-    # Config 9 — best guess combo for new regime: rat up, primed gone,
-    # opp slightly higher to use depth-3 defensively
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=2.8, W_PRIMED_FUTURE=0.0,
-         DISTANCE_DECAY=0.76, W_RAT_EV=1.5, W_OPPONENT_ROLLABLE=0.7),
-
-    # Config 10 — roll up + rat up: if the bot is searching more and scoring
-    # more rat points, does valuing carpet potential even higher compound that?
-    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=3.2, W_PRIMED_FUTURE=0.4,
+    # Config 5 — W=7 + rat EV up: test whether rat hunting compounds with
+    # better carpet discipline or trades off against it
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=7.0, W_PRIMED_FUTURE=0.0,
          DISTANCE_DECAY=0.76, W_RAT_EV=1.5, W_OPPONENT_ROLLABLE=0.6),
+
+    # Config 6 — W=10 + opp rollable 0: does the opponent threat term
+    # help or hurt when rollable potential is already high?
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=10.0, W_PRIMED_FUTURE=0.0,
+         DISTANCE_DECAY=0.76, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.0),
+
+    # Config 7 — W=7 + MIN_REWARDED_ROLL effectively 4 via weight shape:
+    # test if 3-runs should still be rewarded or only 4+
+    # Proxy: keep W=7 but raise opp rollable to discourage giving opponent
+    # the 3-run they'd get from our primed cells
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=7.0, W_PRIMED_FUTURE=0.0,
+         DISTANCE_DECAY=0.76, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=1.5),
+
+    # Config 8 — moderate everything: W=6, rat=1.2, opp=0.8
+    # Safe middle ground between baseline and aggressive W=7+
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=6.0, W_PRIMED_FUTURE=0.0,
+         DISTANCE_DECAY=0.76, W_RAT_EV=1.2, W_OPPONENT_ROLLABLE=0.8),
+
+    # Config 9 — W=10 + rat up: highest carpet incentive + aggressive hunting
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=10.0, W_PRIMED_FUTURE=0.0,
+         DISTANCE_DECAY=0.76, W_RAT_EV=1.5, W_OPPONENT_ROLLABLE=0.6),
+
+    # Config 10 — W=12: test whether the incentive can be too high
+    # (bot hovers near its own primed cells refusing to roll anything short)
+    dict(W_SCORE_DELTA=10.0, W_ROLLABLE_POTENTIAL=12.0, W_PRIMED_FUTURE=0.0,
+         DISTANCE_DECAY=0.76, W_RAT_EV=1.0, W_OPPONENT_ROLLABLE=0.6),
 ]
 
 # ---------------------------------------------------------------------------
