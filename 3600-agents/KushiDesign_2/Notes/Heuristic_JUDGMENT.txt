@@ -1,0 +1,35 @@
+Heuristic_JUDGMENT
+
+Planning heuristic.py
+What a heuristic needs to answer
+Given a board state, return a scalar score representing how good the position is for the player whose turn it currently is. This is always from the current player_worker's perspective — which is correct because forecast_move and reverse_perspective handle the flip when we're evaluating the opponent's responses in search.
+The components, in order of importance
+1. Score delta — trivial but foundational
+player.points - opponent.points. This is the ground truth of who's winning. Everything else is an estimate of future points. The heuristic must weight this heavily or the search will trade real points for phantom potential.
+2. Carpet potential — the hard part, and the most important
+This is what Carrie does that Albert doesn't. Let me think carefully about what "potential" actually means mechanically.
+To score points you need to: prime a cell (1 pt), then later roll carpet across it. The payoff table is superlinear — a roll of 3 is worth 4 pts, a roll of 7 is worth 21. So the value of a primed cell is NOT 1 point — it's 1 point already banked PLUS its contribution to a future carpet roll.
+A primed cell contributes to a roll only if it's part of a contiguous line of primed cells that you can reach. An isolated primed cell surrounded by space is nearly worthless for rolling — you'd score -1 to roll it alone. What matters is the length of the longest contiguous run of primed cells in each direction from your current position, and how reachable those runs are.
+The key insight: reachability matters. A 5-cell primed line on the other side of the board with 3 turns left is worth less than a 3-cell line adjacent to you. We need to discount potential by the turns it would take to set up and execute.
+For Tier 1 (greedy), I'll compute for each direction the length of the contiguous primed run the player could roll into right now. That gives us "immediate rollable potential." We also want to count primed cells the player has laid down that are not yet rollable — those represent future potential.
+3. Primed cell reachability — Carrie's "distance from the bot"
+The assignment description of Carrie says her heuristic accounts for "an estimate of the potential of each cell and its distance from the bot." Distance matters because a primed cell 6 steps away with 2 turns left is worthless. We should weight each primed cell's contribution by a decay function of its Manhattan distance from the player.
+4. Rat EV — additive term, NOT part of the minimax tree
+The best single-cell search EV from the belief state. Add it if positive, ignore if negative. This should be a relatively small weight — rat catching is opportunistic, not the primary scoring mechanism.
+5. Urgency / turns remaining
+With few turns left, unreachable primed cells become worthless. The potential terms should scale down as turns_left decreases.
+What to NOT put in the heuristic
+
+Any board copying or move application. The heuristic evaluates a state, it doesn't simulate forward.
+Any belief state mutation. The heuristic reads from the belief, it never updates it.
+The search decision itself. The heuristic returns an EV contribution from the rat; search.py decides whether to actually issue a SEARCH move.
+
+Tunable weights
+I'll define these as named constants at the top of the file. This is critical — if they're buried in expressions you can never tune them. These will need empirical adjustment once you can run games.
+
+Now writing:Created a file, read a fileCreated a file, read a fileHere's what to scrutinize and what I'm genuinely uncertain about:
+The _future_primed_value accesses board._primed_mask directly. This is the bitboard internals — it's fast, but it's technically reaching into a private attribute. It won't break anything since the board is your own copy, but be aware that if the engine ever changes the internal representation, this silently breaks. The alternative is 64 calls to board.get_cell(). Whether the speed tradeoff is worth the coupling is a judgment call.
+The _opponent_rollable_potential calls reverse_perspective() twice. This is correct but subtle — reverse_perspective() only swaps the worker references, it doesn't copy the board, so this is safe and cheap. But if you ever add state to the heuristic that tracks "whose turn is it," this pattern will break. Worth flagging.
+The weights are completely untuned guesses. W_SCORE_DELTA = 10.0, W_ROLLABLE_POTENTIAL = 2.0 — these numbers came from reasoning about relative magnitude, not from games. The score delta is in raw points; carpet potential is also in points; they should be on roughly the same scale. But "roughly" is doing a lot of work there. The first thing you should do after getting the agent playing is run 50 games against itself with different weight settings and see what actually wins.
+_future_primed_value counts ALL primed cells on the board, including ones the opponent laid down. Primed cells are permanent and either player can roll carpet over them. So the opponent's primed cells are actually also your potential — this is accurate. But it means positioning near the opponent's primed setup is rewarded, which may or may not be the right strategic call. Something to watch.
+The turns_left_discount function exists but isn't wired into evaluate() yet. That's intentional — I wanted you to have it available in search.py without baking it into the heuristic blindly. Whether late-game urgency scaling actually helps is an empirical question, not an obvious one.
